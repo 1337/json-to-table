@@ -29,6 +29,8 @@
 
     HTMLElement.prototype.style = '';
 
+    HTMLElement.prototype.childElementClass = void 0;
+
     HTMLElement.prototype.children = [];
 
     function HTMLElement(params) {
@@ -39,6 +41,7 @@
           if (this.childElementClass) {
             this.add(new this.childElementClass(thing));
           } else {
+            console.log("no child class in " + this.constructor.name);
             this.add(thing);
           }
         }
@@ -57,7 +60,9 @@
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           child = _ref[_i];
-          _results.push(child.toString());
+          if (child instanceof HTMLElement) {
+            _results.push(child.toString());
+          }
         }
         return _results;
       }).call(this)) + "\n</" + this.tagName + ">";
@@ -71,13 +76,12 @@
 
     __extends(TableElement, _super);
 
-    function TableElement() {
-      return TableElement.__super__.constructor.apply(this, arguments);
-    }
-
     TableElement.prototype.tagName = 'table';
 
-    TableElement.prototype.childElementClass = TableRow;
+    function TableElement() {
+      this.childElementClass = TableRow;
+      TableElement.__super__.constructor.apply(this, arguments);
+    }
 
     return TableElement;
 
@@ -87,13 +91,12 @@
 
     __extends(TableHead, _super);
 
-    function TableHead() {
-      return TableHead.__super__.constructor.apply(this, arguments);
-    }
-
     TableHead.prototype.tagName = 'thead';
 
-    TableHead.prototype.childElementClass = TableHeader;
+    function TableHead() {
+      this.childElementClass = TableHeader;
+      TableHead.__super__.constructor.apply(this, arguments);
+    }
 
     return TableHead;
 
@@ -103,13 +106,12 @@
 
     __extends(TableBody, _super);
 
-    function TableBody() {
-      return TableBody.__super__.constructor.apply(this, arguments);
-    }
-
     TableBody.prototype.tagName = 'tbody';
 
-    TableBody.prototype.childElementClass = TableRow;
+    function TableBody() {
+      this.childElementClass = TableRow;
+      TableBody.__super__.constructor.apply(this, arguments);
+    }
 
     return TableBody;
 
@@ -121,9 +123,8 @@
 
     TableData.prototype.tagName = 'td';
 
-    function TableData(children) {
-      this.children = children;
-      console.log("creating td");
+    function TableData(wat) {
+      console.log("creating td with " + wat);
     }
 
     return TableData;
@@ -136,14 +137,14 @@
 
     TableRow.prototype.tagName = 'tr';
 
-    TableRow.prototype.childElementClass = TableData;
-
     function TableRow(fields, isHeader) {
       var cell, cellObj;
       if (isHeader == null) {
         isHeader = false;
       }
       console.log("creating tr");
+      this.childElementClass = TableData;
+      TableRow.__super__.constructor.apply(this, arguments);
       for (cell in fields) {
         cellObj = null;
         if (isHeader) {
@@ -163,11 +164,11 @@
 
     __extends(TableHeader, _super);
 
-    function TableHeader() {
-      return TableHeader.__super__.constructor.apply(this, arguments);
-    }
-
     TableHeader.prototype.tagName = 'th';
+
+    function TableHeader() {
+      TableHeader.__super__.constructor.apply(this, arguments);
+    }
 
     return TableHeader;
 

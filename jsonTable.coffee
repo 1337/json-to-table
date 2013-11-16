@@ -17,7 +17,7 @@ class HTMLElement
   className: ''
   style: ''
 
-  # childElementClass: undefined # HTMLElement
+  childElementClass: undefined # HTMLElement
 
   children: []  # children elements
 
@@ -28,6 +28,7 @@ class HTMLElement
         if @childElementClass
           @add new @childElementClass(thing)
         else
+          console.log "no child class in #{@.constructor.name}"
           @add thing
 
   # add whatever
@@ -37,41 +38,53 @@ class HTMLElement
   toString: ->
     """
       <#{@tagName} class="#{@className}" style="#{@style}">
-        #{child.toString() for child in @children}
+        #{child.toString() for child in @children when child instanceof HTMLElement}
       </#{@tagName}>
     """
 
 
 class TableElement extends HTMLElement
   tagName: 'table'
-  childElementClass: TableRow
+
+  constructor: ->
+    @childElementClass = TableRow
+    super
 
 
 class TableHead extends HTMLElement
   tagName: 'thead'
-  childElementClass: TableHeader
+
+  constructor: ->
+    @childElementClass = TableHeader
+    super
 
 
 class TableBody extends HTMLElement
   tagName: 'tbody'
-  childElementClass: TableRow
+
+  constructor: ->
+    @childElementClass = TableRow
+    super
 
 
 class TableData extends HTMLElement
   tagName: 'td'
 
-  constructor: (@children) ->
-    console.log "creating td"
+  constructor: (wat) ->
+    console.log "creating td with #{wat}"
+    # super
     # children is text, right? and text is array, right?
 
 
 class TableRow extends HTMLElement
   # so, a "record"
   tagName: 'tr'
-  childElementClass: TableData
 
   constructor: (fields, isHeader=false) ->
     console.log "creating tr"
+    @childElementClass = TableData
+    super
+
     for cell of fields
       cellObj = null  # coffee is retarded
       if isHeader
@@ -84,6 +97,9 @@ class TableRow extends HTMLElement
 
 class TableHeader extends TableData
   tagName: 'th'
+
+  constructor: ->
+    super
 
 
 unique = (arr) ->
