@@ -17,7 +17,7 @@ class HTMLElement
   className: ''
   style: ''
 
-  childElementClass: undefined # HTMLElement
+  # childElementClass: undefined # HTMLElement
 
   children: []  # children elements
 
@@ -25,13 +25,16 @@ class HTMLElement
     # the (@thing) parameter syntax auto-fills it
     if params
       for thing in params
-        @add thing
+        if @childElementClass
+          @add new @childElementClass(thing)
+        else
+          @add thing
 
   # add whatever
   add: (child) ->
     @children.push(child)
 
-  toString: =>
+  toString: ->
     """
       <#{@tagName} class="#{@className}" style="#{@style}">
         #{child.toString() for child in @children}
@@ -58,6 +61,7 @@ class TableData extends HTMLElement
   tagName: 'td'
 
   constructor: (@children) ->
+    console.log "creating td"
     # children is text, right? and text is array, right?
 
 
@@ -67,6 +71,7 @@ class TableRow extends HTMLElement
   childElementClass: TableData
 
   constructor: (fields, isHeader=false) ->
+    console.log "creating tr"
     for cell of fields
       cellObj = null  # coffee is retarded
       if isHeader
@@ -98,8 +103,4 @@ unique = (arr) ->
 window.ca ?= {}
 window.ca.ohai ?= {}
 window.ca.ohai.jsonTable = (json) ->
-  table = new TableElement
-  for row in json
-    table.add new TableRow(row)
-
-  table.toString()
+  new TableElement(json).toString()

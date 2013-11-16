@@ -15,7 +15,6 @@
   "use strict";
 
   var HTMLElement, TableBody, TableData, TableElement, TableHead, TableHeader, TableRow, unique, _base, _ref, _ref1,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -30,18 +29,18 @@
 
     HTMLElement.prototype.style = '';
 
-    HTMLElement.prototype.childElementClass = void 0;
-
     HTMLElement.prototype.children = [];
 
     function HTMLElement(params) {
-      this.toString = __bind(this.toString, this);
-
       var thing, _i, _len;
       if (params) {
         for (_i = 0, _len = params.length; _i < _len; _i++) {
           thing = params[_i];
-          this.add(thing);
+          if (this.childElementClass) {
+            this.add(new this.childElementClass(thing));
+          } else {
+            this.add(thing);
+          }
         }
       }
     }
@@ -124,6 +123,7 @@
 
     function TableData(children) {
       this.children = children;
+      console.log("creating td");
     }
 
     return TableData;
@@ -143,6 +143,7 @@
       if (isHeader == null) {
         isHeader = false;
       }
+      console.log("creating tr");
       for (cell in fields) {
         cellObj = null;
         if (isHeader) {
@@ -194,13 +195,7 @@
   }
 
   window.ca.ohai.jsonTable = function(json) {
-    var row, table, _i, _len;
-    table = new TableElement;
-    for (_i = 0, _len = json.length; _i < _len; _i++) {
-      row = json[_i];
-      table.add(new TableRow(row));
-    }
-    return table.toString();
+    return new TableElement(json).toString();
   };
 
 }).call(this);
