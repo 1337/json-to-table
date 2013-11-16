@@ -14,7 +14,7 @@
 (function() {
   "use strict";
 
-  var HTMLElement, TableBody, TableData, TableElement, TableHead, TableHeader, TableRow, _base, _ref, _ref1,
+  var HTMLElement, TableBody, TableData, TableElement, TableHead, TableHeader, TableRow, unique, _base, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -30,15 +30,19 @@
 
     HTMLElement.prototype.style = '';
 
+    HTMLElement.prototype.childElementClass = void 0;
+
     HTMLElement.prototype.children = [];
 
     function HTMLElement(params) {
       this.toString = __bind(this.toString, this);
 
       var thing, _i, _len;
-      for (_i = 0, _len = params.length; _i < _len; _i++) {
-        thing = params[_i];
-        this.add(thing);
+      if (params) {
+        for (_i = 0, _len = params.length; _i < _len; _i++) {
+          thing = params[_i];
+          this.add(thing);
+        }
       }
     }
 
@@ -54,7 +58,7 @@
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           child = _ref[_i];
-          _results.push(this.child.toString());
+          _results.push(child.toString());
         }
         return _results;
       }).call(this)) + "\n</" + this.tagName + ">";
@@ -74,6 +78,8 @@
 
     TableElement.prototype.tagName = 'table';
 
+    TableElement.prototype.childElementClass = TableRow;
+
     return TableElement;
 
   })(HTMLElement);
@@ -88,6 +94,8 @@
 
     TableHead.prototype.tagName = 'thead';
 
+    TableHead.prototype.childElementClass = TableHeader;
+
     return TableHead;
 
   })(HTMLElement);
@@ -100,7 +108,9 @@
       return TableBody.__super__.constructor.apply(this, arguments);
     }
 
-    TableBody.prototype.tagName = 'thead';
+    TableBody.prototype.tagName = 'tbody';
+
+    TableBody.prototype.childElementClass = TableRow;
 
     return TableBody;
 
@@ -110,11 +120,11 @@
 
     __extends(TableData, _super);
 
-    function TableData() {
-      return TableData.__super__.constructor.apply(this, arguments);
-    }
-
     TableData.prototype.tagName = 'td';
+
+    function TableData(children) {
+      this.children = children;
+    }
 
     return TableData;
 
@@ -124,11 +134,25 @@
 
     __extends(TableRow, _super);
 
-    function TableRow() {
-      return TableRow.__super__.constructor.apply(this, arguments);
-    }
-
     TableRow.prototype.tagName = 'tr';
+
+    TableRow.prototype.childElementClass = TableData;
+
+    function TableRow(fields, isHeader) {
+      var cell, cellObj;
+      if (isHeader == null) {
+        isHeader = false;
+      }
+      for (cell in fields) {
+        cellObj = null;
+        if (isHeader) {
+          cellObj = new TableHeader(cell);
+        } else {
+          cellObj = new TableData(cell);
+        }
+        this.add(cellObj);
+      }
+    }
 
     return TableRow;
 
@@ -148,6 +172,19 @@
 
   })(TableData);
 
+  unique = function(arr) {
+    var a, i, u, _i, _ref, _ref1;
+    _ref = [{}, []], u = _ref[0], a = _ref[1];
+    for (i = _i = 0, _ref1 = arr.length; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
+      if (u.hasOwnProperty(arr[i])) {
+        continue;
+      }
+      a.push(arr[i]);
+      u[arr[i]] = 1;
+    }
+    return a.slice(0, -1);
+  };
+
   if ((_ref = window.ca) == null) {
     window.ca = {};
   }
@@ -157,14 +194,13 @@
   }
 
   window.ca.ohai.jsonTable = function(json) {
-    var row, table, _i, _len, _results;
+    var row, table, _i, _len;
     table = new TableElement;
-    _results = [];
     for (_i = 0, _len = json.length; _i < _len; _i++) {
       row = json[_i];
-      _results.push(table.add(new TableRow(row)));
+      table.add(new TableRow(row));
     }
-    return _results;
+    return table.toString();
   };
 
 }).call(this);
