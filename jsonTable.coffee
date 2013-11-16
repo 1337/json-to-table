@@ -13,10 +13,18 @@ class HTMLElement
   ###*
    * Manipulatable, self-closing "element" object.
   ###
-  contents: undefined
+  tagName: 'div'
+  className: ''
+  style: ''
+
+  contents: []  # children elements
 
   toString: =>
-    return @contents
+    """
+      <#{@tagName} class="#{@className}" style="#{@style}">
+        #{@content.toString() for content in @contents}
+      </#{@tagName}>
+    """
 
 
 class TableElement extends HTMLElement
@@ -39,6 +47,7 @@ class TableRow extends HTMLElement
   tagName: 'tr'
   data: []  # get with @data
 
+  # add cell
   add: (tableData) ->
     @data.push(tableData)
 
@@ -47,3 +56,5 @@ class TableHeader extends TableData
   tagName: 'th'
 
 
+
+window.TableElement = TableElement

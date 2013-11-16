@@ -31,10 +31,26 @@
     */
 
 
-    HTMLElement.prototype.contents = void 0;
+    HTMLElement.prototype.tagName = 'div';
+
+    HTMLElement.prototype.className = '';
+
+    HTMLElement.prototype.style = '';
+
+    HTMLElement.prototype.contents = [];
 
     HTMLElement.prototype.toString = function() {
-      return this.contents;
+      var content;
+      return "<" + this.tagName + " class=\"" + this.className + "\" style=\"" + this.style + "\">\n  " + ((function() {
+        var _i, _len, _ref, _results;
+        _ref = this.contents;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          content = _ref[_i];
+          _results.push(this.content.toString());
+        }
+        return _results;
+      }).call(this)) + "\n</" + this.tagName + ">";
     };
 
     return HTMLElement;
@@ -130,5 +146,7 @@
     return TableHeader;
 
   })(TableData);
+
+  window.TableElement = TableElement;
 
 }).call(this);
