@@ -17,12 +17,21 @@ class HTMLElement
   className: ''
   style: ''
 
-  contents: []  # children elements
+  children: []  # children elements
+
+  constructor: (params) ->
+    # the (@thing) parameter syntax auto-fills it
+    for thing in params
+      @add thing
+
+  # add whatever
+  add: (child) ->
+    @children.push(child)
 
   toString: =>
     """
       <#{@tagName} class="#{@className}" style="#{@style}">
-        #{@content.toString() for content in @contents}
+        #{@child.toString() for child in @children}
       </#{@tagName}>
     """
 
@@ -45,16 +54,16 @@ class TableData extends HTMLElement
 
 class TableRow extends HTMLElement
   tagName: 'tr'
-  data: []  # get with @data
-
-  # add cell
-  add: (tableData) ->
-    @data.push(tableData)
 
 
 class TableHeader extends TableData
   tagName: 'th'
 
 
-
-window.TableElement = TableElement
+# create namespace
+window.ca ?= {}
+window.ca.ohai ?= {}
+window.ca.ohai.jsonTable = (json) ->
+  table = new TableElement
+  for row in json
+    table.add new TableRow(row)

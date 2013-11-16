@@ -14,22 +14,15 @@
 (function() {
   "use strict";
 
-  var HTMLElement, TableBody, TableData, TableElement, TableHead, TableHeader, TableRow,
+  var HTMLElement, TableBody, TableData, TableElement, TableHead, TableHeader, TableRow, _base, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   HTMLElement = (function() {
-
-    function HTMLElement() {
-      this.toString = __bind(this.toString, this);
-
-    }
-
     /**
      * Manipulatable, self-closing "element" object.
     */
-
 
     HTMLElement.prototype.tagName = 'div';
 
@@ -37,17 +30,31 @@
 
     HTMLElement.prototype.style = '';
 
-    HTMLElement.prototype.contents = [];
+    HTMLElement.prototype.children = [];
+
+    function HTMLElement(params) {
+      this.toString = __bind(this.toString, this);
+
+      var thing, _i, _len;
+      for (_i = 0, _len = params.length; _i < _len; _i++) {
+        thing = params[_i];
+        this.add(thing);
+      }
+    }
+
+    HTMLElement.prototype.add = function(child) {
+      return this.children.push(child);
+    };
 
     HTMLElement.prototype.toString = function() {
-      var content;
+      var child;
       return "<" + this.tagName + " class=\"" + this.className + "\" style=\"" + this.style + "\">\n  " + ((function() {
         var _i, _len, _ref, _results;
-        _ref = this.contents;
+        _ref = this.children;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          content = _ref[_i];
-          _results.push(this.content.toString());
+          child = _ref[_i];
+          _results.push(this.child.toString());
         }
         return _results;
       }).call(this)) + "\n</" + this.tagName + ">";
@@ -123,12 +130,6 @@
 
     TableRow.prototype.tagName = 'tr';
 
-    TableRow.prototype.data = [];
-
-    TableRow.prototype.add = function(tableData) {
-      return this.data.push(tableData);
-    };
-
     return TableRow;
 
   })(HTMLElement);
@@ -147,6 +148,23 @@
 
   })(TableData);
 
-  window.TableElement = TableElement;
+  if ((_ref = window.ca) == null) {
+    window.ca = {};
+  }
+
+  if ((_ref1 = (_base = window.ca).ohai) == null) {
+    _base.ohai = {};
+  }
+
+  window.ca.ohai.jsonTable = function(json) {
+    var row, table, _i, _len, _results;
+    table = new TableElement;
+    _results = [];
+    for (_i = 0, _len = json.length; _i < _len; _i++) {
+      row = json[_i];
+      _results.push(table.add(new TableRow(row)));
+    }
+    return _results;
+  };
 
 }).call(this);
