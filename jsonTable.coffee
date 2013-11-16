@@ -26,6 +26,7 @@ class HTMLElement
     if params
       for thing in params
         if @childElementClass
+          console.log "adding child class to #{@.constructor.name}"
           @add new @childElementClass(thing)
         else
           console.log "no child class in #{@.constructor.name}"
@@ -33,12 +34,19 @@ class HTMLElement
 
   # add whatever
   add: (child) ->
-    @children.push(child)
+    @children.push child
 
   toString: ->
+    childrenStr = ''
+    for child in @children
+      if child instanceof HTMLElement
+        childrenStr += child.toString()
+      else
+        childrenStr += child
+
     """
       <#{@tagName} class="#{@className}" style="#{@style}">
-        #{child.toString() for child in @children when child instanceof HTMLElement}
+        #{childrenStr}
       </#{@tagName}>
     """
 
@@ -70,10 +78,15 @@ class TableBody extends HTMLElement
 class TableData extends HTMLElement
   tagName: 'td'
 
-  constructor: (wat) ->
-    console.log "creating td with #{wat}"
+  constructor: (@key, @val) ->
+    console.log "creating td with #{@val}"
     # super
     # children is text, right? and text is array, right?
+
+  toString: ->
+    """
+      <#{@tagName} alt="#{@key}">#{@val}</#{@tagName}>
+    """
 
 
 class TableRow extends HTMLElement
@@ -83,14 +96,13 @@ class TableRow extends HTMLElement
   constructor: (fields, isHeader=false) ->
     console.log "creating tr"
     @childElementClass = TableData
-    super
 
-    for cell of fields
+    for k, v of fields
       cellObj = null  # coffee is retarded
       if isHeader
-        cellObj = new TableHeader(cell)
+        cellObj = new TableHeader(k, v)
       else
-        cellObj = new TableData(cell)
+        cellObj = new TableData(k, v)
 
       @add cellObj
 
@@ -98,7 +110,7 @@ class TableRow extends HTMLElement
 class TableHeader extends TableData
   tagName: 'th'
 
-  constructor: ->
+  constructor: (k, v) ->
     super
 
 
