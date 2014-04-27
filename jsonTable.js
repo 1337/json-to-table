@@ -7,190 +7,82 @@
  *
  * MIT
  *
- * Written in CoffeeScript because I want actual classes. Sue me.
 */
 
 
 (function() {
-  "use strict";
+  var jsonTable, objKeys, objsKeys, _base, _ref, _ref1,
+    __hasProp = {}.hasOwnProperty;
 
-  var HTMLElement, TableBody, TableData, TableElement, TableHead, TableHeader, TableRow, unique, _base, _ref, _ref1,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  objKeys = function(obj) {
+    var key, keys;
+    keys = [];
+    for (key in obj) {
+      if (!__hasProp.call(obj, key)) continue;
+      keys.push(key);
+    }
+    return keys;
+  };
 
-  HTMLElement = (function() {
-    /**
-     * Manipulatable, self-closing "element" object.
-    */
+  objsKeys = function(objs) {
+    var key, keys, obj, _i, _j, _len, _len1, _ref;
+    keys = [];
+    for (_i = 0, _len = objs.length; _i < _len; _i++) {
+      obj = objs[_i];
+      _ref = objKeys(obj);
+      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+        key = _ref[_j];
+        if (keys.indexOf(key) === -1) {
+          keys.push(key);
+        }
+      }
+    }
+    return keys;
+  };
 
-    HTMLElement.prototype.tagName = 'div';
-
-    HTMLElement.prototype.className = '';
-
-    HTMLElement.prototype.style = '';
-
-    HTMLElement.prototype.childElementClass = void 0;
-
-    HTMLElement.prototype.children = [];
-
-    function HTMLElement(params) {
-      var thing, _i, _len;
-      if (params) {
-        for (_i = 0, _len = params.length; _i < _len; _i++) {
-          thing = params[_i];
-          if (this.childElementClass) {
-            console.log("adding child class to " + this.constructor.name);
-            this.add(new this.childElementClass(thing));
-          } else {
-            console.log("no child class in " + this.constructor.name);
-            this.add(thing);
+  jsonTable = function(json, opts) {
+    var cell, cellValue, entry, frag, key, keys, row, subTable, table, thead, _i, _j, _k, _len, _len1, _len2;
+    if (opts == null) {
+      opts = {};
+    }
+    frag = document.createDocumentFragment();
+    table = document.createElement('table');
+    keys = opts.keys || objsKeys(json);
+    console.log("keys: " + keys);
+    thead = document.createElement('thead');
+    row = document.createElement('tr');
+    for (_i = 0, _len = keys.length; _i < _len; _i++) {
+      key = keys[_i];
+      cell = document.createElement('th');
+      cell.textContent = key;
+      row.appendChild(cell);
+    }
+    thead.appendChild(row);
+    for (_j = 0, _len1 = json.length; _j < _len1; _j++) {
+      entry = json[_j];
+      row = document.createElement('tr');
+      for (_k = 0, _len2 = keys.length; _k < _len2; _k++) {
+        key = keys[_k];
+        cell = document.createElement('td');
+        cellValue = entry[key] || opts.emptyValue;
+        if (typeof cellValue === 'object') {
+          if (!(cellValue instanceof Array)) {
+            cellValue = [cellValue];
           }
-        }
-      }
-    }
-
-    HTMLElement.prototype.add = function(child) {
-      return this.children.push(child);
-    };
-
-    HTMLElement.prototype.toString = function() {
-      var child, childrenStr, _i, _len, _ref;
-      childrenStr = '';
-      _ref = this.children;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        child = _ref[_i];
-        if (child instanceof HTMLElement) {
-          childrenStr += child.toString();
+          console.log("sub-table");
+          subTable = jsonTable(cellValue, opts);
+          cell.appendChild(subTable);
+          row.appendChild(cell);
         } else {
-          childrenStr += child;
+          cell.textContent = cellValue;
+          row.appendChild(cell);
         }
       }
-      return "<" + this.tagName + " class=\"" + this.className + "\" style=\"" + this.style + "\">\n  " + childrenStr + "\n</" + this.tagName + ">";
-    };
-
-    return HTMLElement;
-
-  })();
-
-  TableElement = (function(_super) {
-
-    __extends(TableElement, _super);
-
-    TableElement.prototype.tagName = 'table';
-
-    function TableElement() {
-      this.childElementClass = TableRow;
-      TableElement.__super__.constructor.apply(this, arguments);
+      table.appendChild(row);
     }
-
-    return TableElement;
-
-  })(HTMLElement);
-
-  TableHead = (function(_super) {
-
-    __extends(TableHead, _super);
-
-    TableHead.prototype.tagName = 'thead';
-
-    function TableHead() {
-      this.childElementClass = TableHeader;
-      TableHead.__super__.constructor.apply(this, arguments);
-    }
-
-    return TableHead;
-
-  })(HTMLElement);
-
-  TableBody = (function(_super) {
-
-    __extends(TableBody, _super);
-
-    TableBody.prototype.tagName = 'tbody';
-
-    function TableBody() {
-      this.childElementClass = TableRow;
-      TableBody.__super__.constructor.apply(this, arguments);
-    }
-
-    return TableBody;
-
-  })(HTMLElement);
-
-  TableData = (function(_super) {
-
-    __extends(TableData, _super);
-
-    TableData.prototype.tagName = 'td';
-
-    function TableData(key, val) {
-      this.key = key;
-      this.val = val;
-      console.log("creating td with " + this.val);
-    }
-
-    TableData.prototype.toString = function() {
-      return "<" + this.tagName + " alt=\"" + this.key + "\">" + this.val + "</" + this.tagName + ">";
-    };
-
-    return TableData;
-
-  })(HTMLElement);
-
-  TableRow = (function(_super) {
-
-    __extends(TableRow, _super);
-
-    TableRow.prototype.tagName = 'tr';
-
-    function TableRow(fields, isHeader) {
-      var cellObj, k, v;
-      if (isHeader == null) {
-        isHeader = false;
-      }
-      console.log("creating tr");
-      this.childElementClass = TableData;
-      for (k in fields) {
-        v = fields[k];
-        cellObj = null;
-        if (isHeader) {
-          cellObj = new TableHeader(k, v);
-        } else {
-          cellObj = new TableData(k, v);
-        }
-        this.add(cellObj);
-      }
-    }
-
-    return TableRow;
-
-  })(HTMLElement);
-
-  TableHeader = (function(_super) {
-
-    __extends(TableHeader, _super);
-
-    TableHeader.prototype.tagName = 'th';
-
-    function TableHeader(k, v) {
-      TableHeader.__super__.constructor.apply(this, arguments);
-    }
-
-    return TableHeader;
-
-  })(TableData);
-
-  unique = function(arr) {
-    var a, i, u, _i, _ref, _ref1;
-    _ref = [{}, []], u = _ref[0], a = _ref[1];
-    for (i = _i = 0, _ref1 = arr.length; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
-      if (u.hasOwnProperty(arr[i])) {
-        continue;
-      }
-      a.push(arr[i]);
-      u[arr[i]] = 1;
-    }
-    return a.slice(0, -1);
+    table.appendChild(thead);
+    frag.appendChild(table);
+    return frag;
   };
 
   if ((_ref = window.ca) == null) {
@@ -201,8 +93,6 @@
     _base.ohai = {};
   }
 
-  window.ca.ohai.jsonTable = function(json) {
-    return new TableElement(json).toString();
-  };
+  window.ca.ohai.jsonTable = jsonTable;
 
 }).call(this);
